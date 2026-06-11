@@ -114,4 +114,3 @@ curl -X DELETE http://localhost:5000/todo/1
 - The API uses in-memory storage (`data.js`) so data resets when the server restarts.
 - Use `http://localhost:5000/todo/:id` for update and delete operations.
 - If you want HTML form support for PUT/DELETE, add `method-override` middleware.
-
