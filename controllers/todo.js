@@ -1,5 +1,5 @@
 let  todos = require('../data.js')
-
+let nextId = todos.length+1;
 const displayTodo = (req,res)=>{
     res.status(200).json(todos)
 }
@@ -13,9 +13,9 @@ const specificTodo = (req,res)=>{
     res.status(200).json(match)
 }
 const createTodo = (req,res)=>{
-    const {id,title,completed} = req.body
-    todos.push({id : id, title : title, completed: completed})
-    res.status(200).send(todos)
+    const {title,completed} = req.body
+    todos.push({id : nextId++, title : title, completed: completed})
+    res.status(201).send(todos)
 }
 const updateTodo = (req,res)=>{
     const reqId = Number(req.params.id)
