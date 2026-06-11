@@ -13,19 +13,21 @@ const specificTodo = (req,res)=>{
     res.status(200).json(match)
 }
 const createTodo = (req,res)=>{
-    const {title,completed} = req.body
-    todos.push({id : nextId++, title : title, completed: completed})
+    const {title} = req.body
+    if (title === undefined){
+         return res.status(400).json({success:false , msg : "please enter a valid title for the to-do"})
+    }
+    todos.push({id : nextId++, title : title, completed: false})
     res.status(201).send(todos)
 }
 const updateTodo = (req,res)=>{
     const reqId = Number(req.params.id)
-    const {id,title,completed} = req.body
+    const {title,completed} = req.body
     const match = todos.find((todo)=>todo.id === reqId)
      if(!match){
         return res.status(404).json({success:false , msg : "required todo does not exist"})
     }
     const index = todos.indexOf(match)
-    if (id !== undefined) todos[index].id = id
     if (title !== undefined) todos[index].title = title
     if (completed !== undefined) todos[index].completed = completed
     res.status(200).json(todos)
@@ -36,13 +38,8 @@ const deleteTodo = (req,res)=>{
      if(!match){
         return res.status(404).json({success:false , msg : "required todo does not exist"})
     }
-    const updateTodo = todos.filter((todo)=>todo.id !== reqId)
-    todos = [];
-    let i= 0;
-    for (const todo of updateTodo) {   
-        todos[i] = todo
-        i++; 
-    }
+    const index = todos.indexOf(match)
+    todos.splice(index,1)
     res.status(200).json({'success' :true, 'todolist' : todos})
 }
 
