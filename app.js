@@ -4,9 +4,10 @@ const app = express()
 const homeRouter = require('./routes/auth')
 const todoRouter = require('./routes/todo')
 const connectDB = require('./db')
-const dayModel = require('./models/day.model')
 const todoModel = require('./models/todo.model')
 app.use(express.json())
+app.use('/',homeRouter)
+app.use('/todo',todoRouter)
 ;(async()=>{
    try {
         await connectDB()
@@ -30,8 +31,6 @@ app.use(express.json())
 
 
 
-app.use('/',homeRouter)
-app.use('/todo',todoRouter)
 
 
 
