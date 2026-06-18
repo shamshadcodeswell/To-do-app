@@ -1,18 +1,22 @@
 const express = require('express')
 const router = express.Router()
 const {
-    displayTodo,
-    specificTodo,
     createTodo,
     updateTodo,
-    deleteTodo
+    deleteTodo,
+    displayWeek,
+    specificDay
                 } = require('../controllers/todo.js')
+router.route('/').get(displayWeek)
 
-router.route('/').get(displayTodo)
-                 .post(createTodo)
+router.route('/:day/query').put(updateTodo)
+                            .delete(deleteTodo)
 
-router.route('/:id').get(specificTodo)
-                    .put(updateTodo)
-                    .delete(deleteTodo)
+router.route('/:day').get(specificDay)
+                    .post(createTodo)
+                    
+
+
+
 
 module.exports = router

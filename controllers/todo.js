@@ -1,51 +1,61 @@
 let  todos = require('../data.js')
-let nextId = todos.length+1;
-const displayTodo = (req,res)=>{
-    res.status(200).json(todos)
+const path = require('path');
+const todoModel = require('../models/todo.model.js')
+
+const displayWeek = (req,res)=>{
+    res.status(200).sendFile(path.join(__dirname,'homepage.html'))
 }
 
-const specificTodo = (req,res)=>{
-    const reqId = req.params.id
-    const match = todos.find((todo)=>todo.id === Number(reqId))
-    if(!match){
+const specificDay = async(req,res)=>{
+    const reqDay = req.params.day 
+    const match = await todoModel.find({day:reqDay})
+    if(!match ||  match.length === 0){
         return res.status(404).json({success:false , msg : "required todo does not exist"})
     }
     res.status(200).json(match)
 }
-const createTodo = (req,res)=>{
+const createTodo = async(req,res)=>{
+    const day = req.params.day
     const {title} = req.body
     if (title === undefined){
          return res.status(400).json({success:false , msg : "please enter a valid title for the to-do"})
     }
-    todos.push({id : nextId++, title : title, completed: false})
-    res.status(201).send(todos)
+    await todoModel.create({
+        title : title,
+        day : day, 
+    })
+    specificDay(req,res);
 }
-const updateTodo = (req,res)=>{
-    const reqId = Number(req.params.id)
-    const {title,completed} = req.body
-    const match = todos.find((todo)=>todo.id === reqId)
-     if(!match){
+const updateTodo = async(req,res)=>{
+    const reqday = req.params.day
+    const reqtitle = req.query.title
+    console.log(reqtitle);
+    
+    const match = await todoModel.find({day:reqday , title : reqtitle})
+     if(!match || match.length===0 ){
         return res.status(404).json({success:false , msg : "required todo does not exist"})
     }
-    const index = todos.indexOf(match)
-    if (title !== undefined) todos[index].title = title
-    if (completed !== undefined) todos[index].completed = completed
-    res.status(200).json(todos)
+    const {day, title, completed} = req.body
+    await todoModel.findOneAndUpdate({day: reqday, title: reqtitle}, 
+                                     {$set : {day : day, title: title, completed : completed}}, {new : false})
+
+     specificDay(req,res);
+
 }
-const deleteTodo = (req,res)=>{
-    const reqId = Number(req.params.id)
-    const match = todos.find((todo)=>todo.id === reqId)
-     if(!match){
+const deleteTodo = async (req,res)=>{
+    const reqday = req.params.day
+    const reqtitle = req.query.title
+    const match = await todoModel.find({day:reqday , title : reqtitle})
+     if(!match || match.length===0 ){
         return res.status(404).json({success:false , msg : "required todo does not exist"})
     }
-    const index = todos.indexOf(match)
-    todos.splice(index,1)
-    res.status(200).json({'success' :true, 'todolist' : todos})
+    await todoModel.findOneAndDelete({day : reqday, title:reqtitle })
+    specificDay(req,res)
 }
 
 module.exports = {
-    displayTodo,
-    specificTodo,
+    displayWeek,
+    specificDay,
     createTodo,
     updateTodo,
     deleteTodo  
