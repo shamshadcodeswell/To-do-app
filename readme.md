@@ -1,103 +1,194 @@
-# To-do App
+# To-Do App
 
-A simple RESTful to-do application built with Node.js and Express.
+A weekly task management application built with **Node.js**, **Express.js**, and **MongoDB**. Organize and track your todos by day of the week with support for priority levels and completion status.
 
-## Tech Used
+## Features
 
-- Node.js
-- Express 5
-- Nodemon (development)
+- 📅 **Weekly Organization**: Manage todos for each day of the week (Monday - Sunday)
+- ✅ **CRUD Operations**: Create, read, update, and delete todos
+- 🎯 **Priority Tracking**: Assign high or normal priority to tasks
+- 📊 **Status Tracking**: Mark todos as completed or pending
+- 🔔 **Timestamps**: Automatic creation and modification timestamps for all todos
 
-## Project Overview
+## Tech Stack
 
-This project provides a small backend API for managing a to-do list. It includes routes to:
+- **Runtime**: Node.js
+- **Framework**: Express.js (v5.2.1)
+- **Database**: MongoDB with Mongoose (v9.7.1)
+- **Environment Management**: dotenv
+- **Development**: Nodemon (auto-reload on file changes)
 
-- list all to-dos
-- create a new to-do
-- fetch a single to-do by ID
-- update a to-do by ID
-- delete a to-do by ID
+## Project Structure
 
-## How It Works
-
-The server listens on port `5000` and exposes two main route groups:
-
-- `/` - a simple homepage route
-- `/todo` - RESTful to-do API routes
-
-The app uses Express JSON middleware to parse request bodies for POST and PUT requests.
-
-## Routes
-
-### Homepage
-
-- `GET /`
-  - Returns a small welcome page with a link to `/todo`
-
-### To-do API
-
-- `GET /todo`
-  - Returns the full list of to-dos
-
-- `POST /todo`
-  - Creates a new to-do
-  - Request body example:
-    ```json
-    {
-      "title": "Learn Express"
-    }
-    ```
-
-- `GET /todo/:id`
-  - Gets a specific to-do by its ID
-
-- `PUT /todo/:id`
-  - Updates a to-do by its ID
-  - Request body example:
-    ```json
-    {
-      "title": "Updated title",
-      "completed": true
-    }
-    ```
-  - Note: `PUT /todo/` without an `id` will not work because the route requires an `id` parameter.
-
-- `DELETE /todo/:id`
-  - Removes the specified to-do from the list
-
-## Example Data
-
-The app starts with a simple in-memory list of to-dos stored in `data.js`.
-
-## Installation
-
-1. Install dependencies:
-
-```bash
-npm install
+```
+├── app.js                 # Main application entry point
+├── package.json           # Project dependencies and metadata
+├── constants.js           # Database name and constants
+├── data.js                # Initial/static data
+├── .env                   # Environment variables (MongoDB URI)
+├── controllers/
+│   └── todo.js           # Business logic for todo operations
+├── models/
+│   ├── todo.model.js     # Todo schema
+│   └── day.model.js      # Day schema
+├── routes/
+│   ├── auth.js           # Homepage route
+│   └── todo.js           # Todo CRUD routes
+└── readme.md             # This file
 ```
 
-2. Start the server:
+## API Endpoints
 
-```bash
-npm start
+### Routes
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/` | Homepage with navigation link |
+| `GET` | `/todo` | Display all todos for the week |
+| `GET` | `/todo/:day` | Get todos for a specific day |
+| `POST` | `/todo/:day` | Create a new todo for a day |
+| `PUT` | `/todo/:day/query` | Update a specific todo |
+| `DELETE` | `/todo/:day/query` | Delete a specific todo |
+
+### Request/Response Examples
+
+#### Get todos for a specific day
+```
+GET /todo/monday
+Response: [
+  {
+    _id: "...",
+    title: "Complete project",
+    day: "monday",
+    completed: false,
+    priority: "high",
+    createdAt: "2026-06-18T...",
+    updatedAt: "2026-06-18T..."
+  }
+]
 ```
 
-3. Open `http://localhost:5000` in your browser or use an API client.
-
-## Example Requests
-
-Create a new to-do:
-
-```bash
-curl -X POST http://localhost:5000/todo \
-  -H "Content-Type: application/json" \
-  -d '{"title":"Buy groceries"}'
+#### Create a new todo
+```
+POST /todo/wednesday
+Body: { "title": "Finish linked list questions" }
+Response: [todos for wednesday]
 ```
 
-Update an existing to-do:
+#### Update a todo
+```
+PUT /todo/thursday/query?title=make%20todo%20project
+Body: { 
+  "title": "updated title",
+  "day": "thursday",
+  "completed": true,
+  "priority": "high"
+}
+Response: [todos for thursday]
+```
 
-```bash
+#### Delete a todo
+```
+DELETE /todo/friday/query?title=task%20to%20delete
+Response: [remaining todos for friday]
+```
+
+## Data Model
+
+### Todo Schema
+
+```javascript
+{
+  title: String (required),
+  day: String (enum: monday-sunday, required),
+  completed: Boolean (default: false),
+  priority: String (enum: high/normal, default: normal),
+  createdAt: Date (auto-generated),
+  updatedAt: Date (auto-generated)
+}
+```
+
+### Day Schema
+
+```javascript
+{
+  day: String (enum: monday-sunday, required),
+  todos: ObjectId (ref: Todo),
+  timestamps: true
+}
+```
+
+## Setup Instructions
+
+### Prerequisites
+- Node.js (v14 or higher)
+- MongoDB Atlas account or local MongoDB instance
+- Git
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/shamshadcodeswell/To-do-app.git
+   cd To-do-app
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment variables**
+   Create or update `.env` file with your MongoDB connection URI:
+   ```
+   DB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/?ssl=true&replicaSet=...&authSource=admin&appName=Cluster0
+   ```
+
+4. **Start the application**
+   ```bash
+   npm start
+   ```
+   The server will start on `http://localhost:5000`
+
+## Usage
+
+1. Navigate to `http://localhost:5000` in your browser
+2. Click the link to access the todo interface
+3. Use the API endpoints to create, read, update, and delete todos
+
+## Troubleshooting
+
+### Database Connection Issues
+
+If you encounter `Database connected Successfully !` not appearing:
+
+1. **Ensure `.env` is loaded** - Add to top of `app.js`:
+   ```javascript
+   require('dotenv').config();
+   ```
+
+2. **Verify MongoDB URI** - Check that your `DB_URI` in `.env` contains the database name (e.g., `/tasks?ssl=true...`)
+
+3. **Check credentials** - Ensure username and password are URL-encoded if they contain special characters
+
+4. **Test connection** - Run `node app.js` and check console output for connection status
+
+## Future Enhancements
+
+- User authentication and authorization
+- Due dates and reminders
+- Recurring todos
+- Categories/Tags for todos
+- Web UI interface
+- API documentation with Swagger
+
+## License
+
+ISC
+
+## Repository
+
+https://github.com/shamshadcodeswell/To-do-app
 curl -X PUT http://localhost:5000/todo/1 \
   -H "Content-Type: application/json" \
   -d '{"title":"Updated title","completed":true}'
